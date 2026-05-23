@@ -1,0 +1,39 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.py[cod]
+build/
+dist/
+wheels/
+*.egg-info
+*.so
+.Python
+.env
+dist/
+build/
+
+# Virtual environments
+.venv
+venv/
+
+#IDE
+.vscode/
+.idea/
+*.swp
+
+# Логи и БД
+*.log
+*.db
+*.sqlite3
+
+# Миграции (не обязательно, но можно включить alembic/versions)
+# migrations/        # раскомментировать если хотите игнорировать миграции
+
+# Загрузки пользователей
+uploads/
+media/
+
+# Docker
+*.pi
+
+uv-cache/
