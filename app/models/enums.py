@@ -14,6 +14,7 @@ class Priority(str, PyEnum):
     def __str__(self):
         return self.name.lower()
 
+
 class Status(PyEnum, str):
     """
     Жизненный цикл тикета. Позволяет отслеживать текущее состояние проблемы:
@@ -30,3 +31,16 @@ class Status(PyEnum, str):
     WAITING_FOR_CUSTOMER = "waiting_for_customer"
     RESOLVED = "resolved"
     CLOSED = "closed"
+
+
+class Role(str, PyEnum):
+    """
+    Роли пользователей для контроля доступа (RBAC).
+    Определяют, какие эндпоинты и действия доступны пользователю:
+    - CLIENT: может создавать тикеты и видеть только свои.
+    - AGENT: обрабатывает тикеты, видит все заявки, пишет внутренние комментарии.
+    - ADMIN: управляет системой (настраивает категории, SLA, блокирует юзеров).
+    """
+    CLIENT = "client"
+    AGENT = "agent"
+    ADMIN = "admin"

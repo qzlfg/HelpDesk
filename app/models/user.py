@@ -3,24 +3,12 @@ from typing import TYPE_CHECKING, List
 
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, Enum
-from enum import Enum as PyEnum
+from .enums import Role
 
 if TYPE_CHECKING:
     from app.models.ticket import Ticket
     from .comment import Comment
     from .attachment import Attachment
-class Role(str, PyEnum):
-    """
-    Роли пользователей для контроля доступа (RBAC).
-    Определяют, какие эндпоинты и действия доступны пользователю:
-    - CLIENT: может создавать тикеты и видеть только свои.
-    - AGENT: обрабатывает тикеты, видит все заявки, пишет внутренние комментарии.
-    - ADMIN: управляет системой (настраивает категории, SLA, блокирует юзеров).
-    """
-    CLIENT = "client"
-    AGENT = "agent"
-    ADMIN = "admin"
-
 
 class User(SQLModel, table=True):
     """
