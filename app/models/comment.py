@@ -9,7 +9,8 @@ if TYPE_CHECKING:
     from .user import User
     from .ticket import Ticket
     from .attachment import Attachment
-    
+
+
 class Comment(SQLModel, table=True):
     """
     Модель комментария к тикету.
