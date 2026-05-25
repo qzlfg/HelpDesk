@@ -23,8 +23,10 @@ class User(SQLModel, table=True):
     
     # Список тикетов, которые этот пользователь создал (клиент)
     created_tickets: List[Ticket] = Relationship(back_populates="creator")
+    
     # Список тикетов, которые назначены на этого пользователя для решения (агент)
     assigned_tickets: List[Ticket] = Relationship(back_populates="assignee")
+    
     #Список комментариев для тикетов
     comment_tickets: List[Comment] = Relationship(back_populates="creator_of_comment")
     created_attachments: List[Attachment] = Relationship(back_populates="user")
