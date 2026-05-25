@@ -32,9 +32,9 @@ class Attachment(SQLModel, table=True):
     
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
-    uploader_id: int = Field(foreign_key="user.id")
-    ticket_id: int = Field(foreign_key="ticket.id")
-    comment_id: int | None = Field(default=None, foreign_key="comment.id", nullable=True)
+    uploader_id: int = Field(foreign_key="user.id", index=True)
+    ticket_id: int = Field(foreign_key="ticket.id", index=True)
+    comment_id: int | None = Field(default=None, foreign_key="comment.id", nullable=True, index=True)
     
     ticket_with_attachment: Ticket = Relationship(back_populates="attachments")
     user: User = Relationship(back_populates="created_attachments")

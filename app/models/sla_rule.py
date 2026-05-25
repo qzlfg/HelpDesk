@@ -39,6 +39,6 @@ class SLARule(SQLModel, table=True):
     # и система будет использовать дефолтные значения.
     is_active: bool = Field(default=True, nullable=False)
     
-    category_id: int = Field(foreign_key="category.id")
+    category_id: int = Field(foreign_key="category.id", index=True)
     
     category_sla: Category = Relationship(back_populates="sla_rules")

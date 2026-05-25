@@ -18,9 +18,11 @@ class Comment(SQLModel, table=True):
     """
     id: int | None = Field(default=None, primary_key=True, index=True)
     content: str = Field(nullable=False)
-    creator_id: int = Field(foreign_key="user.id")
-    ticket_id: int = Field(foreign_key="ticket.id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    #Внешние ключи
+    creator_id: int = Field(foreign_key="user.id", index=True)
+    ticket_id: int = Field(foreign_key="ticket.id", index=True)
     
     # Флаг «только для агентов». Если True — при выдаче через API клиентам 
     # мы будем отфильтровывать этот комментарий.

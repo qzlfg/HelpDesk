@@ -41,9 +41,9 @@ class Ticket(SQLModel, table=True):
     closed_at: datetime | None = Field(default=None)
     
     # Внешние ключи
-    creator_id: int = Field(foreign_key="user.id", nullable=False)
-    assignee_id: int | None = Field(foreign_key="user.id", default=None)
-    category_id: int = Field(foreign_key="category.id", nullable=False)
+    creator_id: int = Field(foreign_key="user.id", nullable=False, index=True)
+    assignee_id: int | None = Field(foreign_key="user.id", default=None, index=True)
+    category_id: int = Field(foreign_key="category.id", nullable=False, index=True)
     
     category: Category = Relationship(back_populates="tickets_with_exact_category")
     creator: User = Relationship(back_populates="created_tickets", sa_relationship_kwargs={"foreign_keys": "Ticket.creator_id"})
