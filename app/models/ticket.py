@@ -1,44 +1,17 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
+
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, Enum
-from enum import Enum as PyEnum
-from datetime import datetime
+from datetime import datetime, timezone
 
+from .enums import Priority, Status
 
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.category import Category
-
-class Priority(str, PyEnum):
-    """
-    Уровень критичности тикета. 
-    Влияет на то, как быстро агент должен отреагировать и решить проблему (SLA).
-    """
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    URGENT = "urgent"
-
-    def __str__(self):
-        return self.name.lower()
-
-class Status(PyEnum, str):
-    """
-    Жизненный цикл тикета. Позволяет отслеживать текущее состояние проблемы:
-    - NEW: только создан, никто не взял в работу.
-    - ASSIGNED: назначен агент, но работа еще не начата.
-    - IN_PROGRESS: агент активно решает проблему.
-    - WAITING_FOR_CUSTOMER: агент задал вопрос клиенту и ждет ответа (таймер SLA на решение обычно ставится на паузу).
-    - RESOLVED: агент пометил проблему как решенную (но клиент еще может переоткрыть).
-    - CLOSED: окончательно закрыт, изменения запрещены.
-    """
-    NEW = "new"
-    ASSIGNED = "assigned"
-    IN_PROGRESS = "in_progress"
-    WAITING_FOR_CUSTOMER = "waiting_for_customer"
-    RESOLVED = "resolved"
-    CLOSED = "closed"
+    from .comment import Comment
+    from .attachment import Attachment
     
 
 class Ticket(SQLModel, table=True):
@@ -47,7 +20,7 @@ class Ticket(SQLModel, table=True):
     Связывает воедино клиента, исполнителя, категорию проблемы и историю её решения.
     Временные метки используются для расчета нарушений SLA.
     """
-    id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True, index=True)
     header: str = Field(default=None, index=True, max_length=255, nullable=False)
     description: str = Field(default=None, nullable=False)
     
@@ -57,12 +30,15 @@ class Ticket(SQLModel, table=True):
     # не сможет его создать и будет выдавать ошибки при генерации миграций.
     status: Status = Field(sa_column=Column(Enum(Status, name="ticket_status_enum"), nullable=False, server_default=Status.NEW.value))
     
-    priority: Priority = Field(sa_column=Column(Enum(Priority), nullable=False))
+    priority: Priority = Field(sa_column=Column(Enum(Priority, name="ticket_priority_enum"), nullable=False))
+    
+    response_deadline: datetime | None = Field(default=None)
+    resolution_deadline: datetime | None = Field(default=None)
     
     # Временные метки для аналитики и SLA
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime | None = Field(default=None)
-    closed_at: datetime | None = Field(default_factory=None)
+    closed_at: datetime | None = Field(default=None)
     
     # Внешние ключи
     creator_id: int = Field(foreign_key="user.id", nullable=False)
@@ -72,4 +48,5 @@ class Ticket(SQLModel, table=True):
     category: Category = Relationship(back_populates="tickets_with_exact_category")
     creator: User = Relationship(back_populates="created_tickets", sa_relationship_kwargs={"foreign_keys": "Ticket.creator_id"})
     assignee: User | None = Relationship(back_populates="assigned_tickets", sa_relationship_kwargs={"foreign_keys": "Ticket.assignee_id"})
-    
+    comments: List[Comment] = Relationship(back_populates="ticket")
+    attachments: List[Attachment] = Relationship(back_populates="ticket_with_attachment")

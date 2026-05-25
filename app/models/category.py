@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
     from .ticket import Ticket
+    from .sla_rule import SLARule
     
 
 class Category(SQLModel, table=True):
@@ -22,3 +23,5 @@ class Category(SQLModel, table=True):
     
     # Все тикеты, относящиеся к данной категории
     tickets_with_exact_category: list[Ticket] = Relationship(back_populates="category")
+    
+    sla_rules: List[SLARule] = Relationship(back_populates="category_sla")
