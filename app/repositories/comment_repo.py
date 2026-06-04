@@ -20,9 +20,8 @@ class CommentRepository:
     async def get_by_ticket_id(self, ticket_id: int) -> Sequence[Comment]:
         """
         Получает все комментарии для конкретного тикета.
-        Критически важный метод для отрисовки "чата" внутри заявки.
+        Метод для отрисовки "чата" внутри заявки.
         """
-        # order_by гарантирует, что старые сообщения будут сверху, а новые — снизу
         statement = (
             select(Comment)
             .where(Comment.ticket_id == ticket_id)

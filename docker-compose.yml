@@ -13,7 +13,7 @@ networks:
 
 services:
   database:
-    image: postgres:15-alpine
+    image: postgres:18-alpine
     container_name: production_postgres
     restart: always
     networks:
@@ -46,7 +46,7 @@ services:
       start_period: 10s
 
   redis:
-    image: valkey/valkey:8-alpine
+    image: valkey/valkey:9-alpine
     container_name: production_redis
     restart: always
     networks:
