@@ -1,0 +1,51 @@
+from passlib.context import CryptContext
+
+from ..models.user import User
+from ..schemas.user import UserCreate, UserUpdate
+from ..repositories.user_repo import UserRepository
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class UserService:
+    def __init__(self, user_repo: UserRepository):
+        self.user_repo = user_repo
+        
+    async def create_user(self, user_in: UserCreate) -> User:
+        '''
+        Регистрирует нового пользователя.
+        Проверяет уникальность email и безопасно хеширует пароль перед сохранением в БД.
+        '''
+        existing_user = await self.user_repo.get_by_email(user_in.email)
+        if existing_user:
+            raise ValueError(f"Пользователь с email {user_in.email} уже существует")
+
+        hashed_password = pwd_context.hash(user_in.password)
+        user_in.password = hashed_password
+
+        return await self.user_repo.create(user_in)
+
+    async def get_user_by_id(self, id: int) -> User:
+        """
+        Возвращает пользователя по ID или выбрасывает ошибку.
+        """
+        res = await self.user_repo.get_by_id(id)
+        if not res:
+            raise ValueError("Такого пользователя не существует")
+        return res
+        
+    async def get_user_by_email(self, email: str) -> User:
+        res = await self.user_repo.get_by_email(email)
+        if not res:
+            raise ValueError(f"Пользователь с email {email} не найден")
+        return res
+        
+    
+    async def update_user(self, user_id: int, update_in: UserUpdate) -> User:
+        user_db = await self.get_user_by_id(user_id)
+        
+        update_data = update_in.model_dump(exclude_unset=True)
+        
+        if "password" in update_data:
+            update_data["password"] = pwd_context.hash(update_data["password"])
+            
+        return await self.user_repo.update(user_db, update_data)
