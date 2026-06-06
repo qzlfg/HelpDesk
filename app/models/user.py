@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from app.models.ticket import Ticket
     from .comment import Comment
     from .attachment import Attachment
+    from .ticket_history import TicketHistory
+
 
 class User(SQLModel, table=True):
     """
@@ -27,6 +29,6 @@ class User(SQLModel, table=True):
     # Список тикетов, которые назначены на этого пользователя для решения (агент)
     assigned_tickets: List[Ticket] = Relationship(back_populates="assignee")
     
-    #Список комментариев для тикетов
     comment_tickets: List[Comment] = Relationship(back_populates="creator_of_comment")
     created_attachments: List[Attachment] = Relationship(back_populates="user")
+    changed_tickets: List[TicketHistory] = Relationship(back_populates="user_changed")

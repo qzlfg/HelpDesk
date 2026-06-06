@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.category import Category
     from .comment import Comment
     from .attachment import Attachment
+    from .ticket_history import TicketHistory
     
 
 class Ticket(SQLModel, table=True):
@@ -50,3 +51,5 @@ class Ticket(SQLModel, table=True):
     assignee: User | None = Relationship(back_populates="assigned_tickets", sa_relationship_kwargs={"foreign_keys": "Ticket.assignee_id"})
     comments: List[Comment] = Relationship(back_populates="ticket")
     attachments: List[Attachment] = Relationship(back_populates="ticket_with_attachment")
+    histories_ticket: List[TicketHistory] = Relationship(back_populates="history_of_tikcet")
+    

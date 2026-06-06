@@ -10,6 +10,7 @@ dependencies = [
     "email-validator>=2.3.0",
     "fastapi>=0.136.1",
     "faststream[redis]>=0.6.7",
+    "gunicorn>=26.0.0",
     "orjson>=3.11.9",
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.14.1",
