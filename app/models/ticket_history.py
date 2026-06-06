@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from .user import User
 
 
-class TicketHistory(SQLModel, tanle=True):
+class TicketHistory(SQLModel, table=True):
     """
     Таблица для хранения истории изменений тикетов.
     Позволяет детально отследить, кто, когда и что изменил.
@@ -23,14 +23,14 @@ class TicketHistory(SQLModel, tanle=True):
     changed_by_id: int = Field(foreign_key="user.id")
     
     # Какое поле изменилось (например: "status_id", "priority", "assignee_id")
-    field_name: str | None = Field(default=None)
+    field_name: str = Field(nullable=False)
     
     # Старое и новое значение
     old_value: str | None = Field(default=None)
     new_value: str | None = Field(default=None)
     
     # Время изменения
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    changed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
-    history_of_tikcet: Ticket = Relationship(back_populates="histories_ticket")
+    ticket_history: Ticket = Relationship(back_populates="histories_ticket")
     user_changed: User = Relationship(back_populates="changed_tickets")

@@ -51,5 +51,5 @@ class Ticket(SQLModel, table=True):
     assignee: User | None = Relationship(back_populates="assigned_tickets", sa_relationship_kwargs={"foreign_keys": "Ticket.assignee_id"})
     comments: List[Comment] = Relationship(back_populates="ticket")
     attachments: List[Attachment] = Relationship(back_populates="ticket_with_attachment")
-    histories_ticket: List[TicketHistory] = Relationship(back_populates="history_of_tikcet")
+    histories_ticket: List[TicketHistory] = Relationship(back_populates="ticket_history")
     

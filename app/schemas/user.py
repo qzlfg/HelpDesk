@@ -4,7 +4,6 @@ from ..models.enums import Role
 
 class UserBase(BaseModel):
     email: EmailStr
-    role: Role
 
 
 class UserCreate(UserBase):
@@ -13,6 +12,8 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: int
+    role: Role
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -20,5 +21,8 @@ class UserResponse(UserBase):
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     password: str | None = None
-    #Админ может поменять роль (с юзера на агента)
-    role: Role | None = None
+
+class UserUpdateAdmin(BaseModel):
+    email: EmailStr | None = None
+    password: str | None = None
+    role: str | None = None

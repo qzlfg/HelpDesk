@@ -41,9 +41,9 @@ class TicketRepository:
         
         db_ticket = Ticket(**ticket_data)
         
-        self.session.add(ticket_data)
+        self.session.add(db_ticket)
         await self.session.flush() 
-        await self.session.refresh(ticket_data)
+        await self.session.refresh(db_ticket)
         
         return db_ticket
 

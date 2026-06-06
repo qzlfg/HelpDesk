@@ -31,13 +31,14 @@ class UserRepository:
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 
-    async def create(self, user_in: UserCreate) -> User:
+    async def create(self, user_in: dict) -> User:
         """
         Создает нового пользователя в базе данных.
-        Обрати внимание: мы делаем flush(), а не commit(). 
-        Это позволяет получить ID нового пользователя, не закрывая транзакцию.
+        
+        Принимает словарь (dict), а не Pydantic-схему, так как ожидает уже 
+        полностью подготовленные данные от слоя сервисов (с захешированным паролем и назначенной ролью).
         """
-        db_user = User(**user_in.model_dump())
+        db_user = User(**user_in)
         
         self.session.add(db_user)
         # flush() отправляет SQL-запрос INSERT в базу, база генерирует ID,
