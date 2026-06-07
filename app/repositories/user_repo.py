@@ -1,9 +1,7 @@
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from ..models.user import User
-from ..schemas.user import UserCreate
 
 
 class UserRepository:

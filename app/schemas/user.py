@@ -22,6 +22,7 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     password: str | None = None
 
+
 class UserUpdateAdmin(BaseModel):
     email: EmailStr | None = None
     password: str | None = None
