@@ -1,12 +1,8 @@
-from passlib.context import CryptContext
-
 from ..models.user import User
 from ..schemas.user import UserCreate, UserUpdate, UserUpdateAdmin
 from ..repositories.user_repo import UserRepository
 from ..models.enums import Role
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+from ..core.security import get_password_hash
 
 class UserService:
     def __init__(self, user_repo: UserRepository):
@@ -21,7 +17,7 @@ class UserService:
         if existing_user:
             raise ValueError(f"Пользователь с email {user_in.email} уже существует")
 
-        hashed_password = pwd_context.hash(user_in.password)
+        hashed_password = get_password_hash(user_in.password)
         user_data = user_in.model_dump()
         user_data["password"] = hashed_password
         user_data["role"] = Role.CLIENT
@@ -50,7 +46,7 @@ class UserService:
         update_data = update_in.model_dump(exclude_unset=True)
         
         if "password" in update_data:
-            update_data["password"] = pwd_context.hash(update_data["password"])
+            update_data["password"] = get_password_hash(update_data["password"])
             
         return await self.user_repo.update(user_db, update_data)
     
@@ -60,6 +56,6 @@ class UserService:
         update_data = update_in.model_dump(exclude_unset=True)
         
         if "password" in update_data:
-            update_data["password"] = pwd_context.hash(update_data["password"])
+            update_data["password"] = get_password_hash(update_data["password"])
             
         return await self.user_repo.update(user_db, update_data)
