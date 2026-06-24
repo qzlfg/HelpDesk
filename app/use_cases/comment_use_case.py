@@ -13,6 +13,10 @@ class CreateCommentUseCase:
         self.ticket_service = ticket_service
 
     async def execute(self, comment_in: CommentCreate, creator_id: int) -> Comment:
+        '''
+        Сначала проверяем существует ли такой тикет, а потом создаём комментарий к этому тикету
+        '''
+        #Проверка внешнего условия (если тикета нет, код выбросит ValueError)
         await self.ticket_service.get_ticket_by_id(comment_in.ticket_id)
 
         return await self.comment_service.create_comment(comment_in, creator_id)

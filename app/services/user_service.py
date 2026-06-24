@@ -34,6 +34,9 @@ class UserService:
         return res
         
     async def get_user_by_email(self, email: str) -> User:
+        """
+        Возвращает пользователя по почте или выбрасывает ошибку.
+        """
         res = await self.user_repo.get_by_email(email)
         if not res:
             raise ValueError(f"Пользователь с email {email} не найден")

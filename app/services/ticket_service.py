@@ -15,6 +15,7 @@ class TicketService:
 
     
     async def get_ticket_by_id(self, id: int) -> Ticket:
+        '''Возвращает тикет, если такой существует, иначе ошибка'''
         res = await self.ticket_repo.get_by_id(id)
         if res:
             return res
@@ -23,6 +24,7 @@ class TicketService:
     
     
     async def search_ticket_by_header(self, header: str) -> Sequence[Ticket]:
+        '''Возвращает список тикетов по заголовку, если они есть, иначе пустой список'''
         res = await self.ticket_repo.search_by_header(header)
         return res if res else []
     
