@@ -5,8 +5,6 @@ from ..core import security
 class AuthService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
-        
-    
     
     async def authenticate_user(self, email: str, password: str) -> str:
         """

@@ -33,10 +33,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     Генерирует JWT токен.
     В 'data' мы будем передавать словарь вида {"sub": str(user_id)}.
     """
-    # Делаем копию словаря, чтобы случайно не изменить оригинал
+
     to_encode = data.copy()
     
-    # Устанавливаем время "смерти" токена
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
@@ -44,7 +43,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         
     to_encode.update({"exp": expire})
     
-    # Создаем саму зашифрованную строку
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
     
     return encoded_jwt

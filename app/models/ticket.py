@@ -29,9 +29,11 @@ class Ticket(SQLModel, table=True):
     # В Postgres Enum — это не просто ограничение строки, а отдельный кастомный тип данных 
     # (как INTEGER или VARCHAR). Если не дать ему имя, инструмент миграций (Alembic) 
     # не сможет его создать и будет выдавать ошибки при генерации миграций.
-    status: Status = Field(sa_column=Column(Enum(Status, name="ticket_status_enum"), nullable=False, server_default=Status.NEW.value))
+    status: Status = Field(sa_column=Column(Enum(Status, name="ticket_status_enum", values_callable=lambda x: [e.value for e in x]),
+                                            nullable=False, server_default=Status.NEW.value))
     
-    priority: Priority = Field(sa_column=Column(Enum(Priority, name="ticket_priority_enum"), nullable=False))
+    priority: Priority = Field(sa_column=Column(Enum(Priority, name="ticket_priority_enum",
+                                                    values_callable=lambda x: [e.value for e in x]), nullable=False))
     
     response_deadline: datetime | None = Field(default=None)
     resolution_deadline: datetime | None = Field(default=None)

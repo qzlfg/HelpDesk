@@ -41,9 +41,9 @@ class CommentRepository:
         
         db_comment = Comment(**comment_data)
         
-        self.session.add(comment_data)
+        self.session.add(db_comment)
         await self.session.flush() 
-        await self.session.refresh(comment_data)
+        await self.session.refresh(db_comment)
         
         return db_comment
 

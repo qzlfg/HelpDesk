@@ -1,6 +1,7 @@
 from sqlmodel import select, col
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Sequence
+from datetime import datetime, timezone
 
 
 from ..models.ticket import Ticket
@@ -46,12 +47,14 @@ class TicketRepository:
         await self.session.refresh(db_ticket)
         
         return db_ticket
+    
 
     async def update(self, db_ticket: Ticket, update_data: dict) -> Ticket:
         """
         Обновляет существующий тикет.
         Принимает объект из БД и словарь с новыми данными.
         """
+        update_data["updated_at"] = datetime.now(timezone.utc)
         for key, value in update_data.items():
             setattr(db_ticket, key, value)
             

@@ -27,7 +27,7 @@ class SLARule(SQLModel, table=True):
     # Название правила
     name: str = Field(nullable=False)
     
-    priority: Priority = Field(sa_column=Column(Enum(Priority, name="ticket_priority_enum"), nullable=False))
+    priority: Priority = Field(sa_column=Column(Enum(Priority, name="ticket_priority_enum", values_callable=lambda x: [e.value for e in x]), nullable=False))
     
     # Сколько минут дается агенту на первый ответ (перевод из статуса NEW).
     response_time_minutes: int = Field(default=12, nullable=False)

@@ -1,7 +1,7 @@
-from enum import Enum as PyEnum
+from enum import StrEnum
 
 
-class Priority(str, PyEnum):
+class Priority(StrEnum):
     """
     Уровень критичности тикета. 
     Влияет на то, как быстро агент должен отреагировать и решить проблему (SLA).
@@ -15,7 +15,7 @@ class Priority(str, PyEnum):
         return self.name.lower()
 
 
-class Status(PyEnum, str):
+class Status(StrEnum):
     """
     Жизненный цикл тикета. Позволяет отслеживать текущее состояние проблемы:
     - NEW: только создан, никто не взял в работу.
@@ -33,7 +33,7 @@ class Status(PyEnum, str):
     CLOSED = "closed"
 
 
-class Role(str, PyEnum):
+class Role(StrEnum):
     """
     Роли пользователей для контроля доступа (RBAC).
     Определяют, какие эндпоинты и действия доступны пользователю:

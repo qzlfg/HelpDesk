@@ -21,7 +21,9 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
     email: str = Field(unique=True, index=True, max_length=255)
     password_hash: str = Field(max_length=255)
-    role: Role = Field(sa_column=Column(Enum(Role, name="user_role_enum"), nullable=False, server_default=Role.CLIENT.value))
+    role: Role = Field(sa_column=Column(Enum(Role, name="user_role_enum", values_callable=lambda x: [e.value for e in x]),
+                                        nullable=False, server_default=Role.CLIENT.value))
+    is_active: bool = Field(default=True)
     
     # Список тикетов, которые этот пользователь создал (клиент)
     created_tickets: List[Ticket] = Relationship(back_populates="creator")
