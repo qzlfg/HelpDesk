@@ -15,6 +15,10 @@ from app.services.auth_service import AuthService
 from app.services.user_service import UserService
 from app.services.category_service import CategoryService
 
+from app.models.enums import Role
+from app.models.user import User
+
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
@@ -66,5 +70,29 @@ async def get_current_user(
         raise credentials_exception
         
     user = await user_service.get_user_by_id(user_id)
-        
+    
+    if user is None:
+        raise credentials_exception
+    
     return user
+
+
+async def get_current_admin(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    if current_user.role != Role.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Доступно только администратору"
+        )
+    return current_user
+
+async def get_current_agent(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    if current_user.role not in (Role.AGENT, Role.ADMIN):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Доступно только агенту или администратору"
+        )
+    return current_user

@@ -11,8 +11,9 @@ class UserService:
     async def create_user(self, user_in: UserCreate) -> User:
         '''
         Регистрирует нового пользователя.
-        Проверяет уникальность email и безопасно хеширует пароль перед сохранением в БД.
+        Проверяет уникальность email и хеширует пароль перед сохранением в БД.
         '''
+        
         existing_user = await self.user_repo.get_by_email(user_in.email)    
         if existing_user:
             raise ValueError(f"Пользователь с email {user_in.email} уже существует")
@@ -24,14 +25,19 @@ class UserService:
 
         return await self.user_repo.create(user_data)
 
-    async def get_user_by_id(self, id: int) -> User:
+
+    async def get_user_by_id(self, id: int) -> User | None:
         """
         Возвращает пользователя по ID или выбрасывает ошибку.
         """
-        res = await self.user_repo.get_by_id(id)
-        if not res:
-            raise ValueError("Такого пользователя не существует")
-        return res
+        return await self.user_repo.get_by_id(id)
+
+    async def get_user_or_raise(self, user_id: int) -> User:
+        user = await self.get_user_by_id(user_id)
+        if user is None:
+            raise ValueError(f"Пользователь с ID {user_id} не найден") 
+        return user
+        
         
     async def get_user_by_email(self, email: str) -> User:
         """
@@ -44,7 +50,7 @@ class UserService:
         
     
     async def update_user(self, user_id: int, update_in: UserUpdate) -> User:
-        user_db = await self.get_user_by_id(user_id)
+        user_db = await self.get_user_or_raise(user_id)
         
         update_data = update_in.model_dump(exclude_unset=True)
         
@@ -54,7 +60,7 @@ class UserService:
         return await self.user_repo.update(user_db, update_data)
     
     async def update_user_by_admin(self, user_id: int, update_in: UserUpdateAdmin) -> User:
-        user_db = await self.get_user_by_id(user_id)
+        user_db = await self.get_user_or_raise(user_id)
         
         update_data = update_in.model_dump(exclude_unset=True)
         

@@ -26,4 +26,4 @@ class UserUpdate(BaseModel):
 class UserUpdateAdmin(BaseModel):
     email: EmailStr | None = None
     password: str | None = None
-    role: str | None = None
+    role: Role | None = None
