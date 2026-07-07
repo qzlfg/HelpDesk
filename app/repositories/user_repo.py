@@ -1,5 +1,7 @@
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Sequence
+
 
 from ..models.user import User
 
@@ -28,6 +30,15 @@ class UserRepository:
         statement = select(User).where(User.email == email)
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
+    
+    
+    async def get_all_users(self, skip: int, limit: int) -> Sequence[User]:
+        """
+        Ищет всех пользователей в БД
+        """
+        statement = select(User).offset(skip).limit(limit)
+        result = await self.session.execute(statement)
+        return result.scalars().all()
 
     async def create(self, user_in: dict) -> User:
         """
@@ -39,8 +50,7 @@ class UserRepository:
         db_user = User(**user_in)
         
         self.session.add(db_user)
-        # flush() отправляет SQL-запрос INSERT в базу, база генерирует ID,
-        # но изменения еще не зафиксированы окончательно (можно сделать rollback)
+        
         await self.session.flush() 
         await self.session.refresh(db_user)
         

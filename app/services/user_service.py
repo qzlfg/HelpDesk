@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from ..models.user import User
 from ..schemas.user import UserCreate, UserUpdate, UserUpdateAdmin
 from ..repositories.user_repo import UserRepository
@@ -47,7 +49,10 @@ class UserService:
         if not res:
             raise ValueError(f"Пользователь с email {email} не найден")
         return res
-        
+    
+    
+    async def get_all_users(self, skip: int, limit: int) -> Sequence[User]:
+        return await self.user_repo.get_all_users(skip, limit)
     
     async def update_user(self, user_id: int, update_in: UserUpdate) -> User:
         user_db = await self.get_user_or_raise(user_id)
@@ -58,6 +63,7 @@ class UserService:
             update_data["password"] = get_password_hash(update_data["password"])
             
         return await self.user_repo.update(user_db, update_data)
+    
     
     async def update_user_by_admin(self, user_id: int, update_in: UserUpdateAdmin) -> User:
         user_db = await self.get_user_or_raise(user_id)

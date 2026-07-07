@@ -10,10 +10,12 @@ from app.core.security import ALGORITHM
 
 from app.repositories.user_repo import UserRepository
 from app.repositories.category_repo import CategoryRepository
+from app.repositories.comment_repo import CommentRepository
 
 from app.services.auth_service import AuthService
 from app.services.user_service import UserService
 from app.services.category_service import CategoryService
+from app.services.comment_service import CommentService
 
 from app.models.enums import Role
 from app.models.user import User
@@ -28,6 +30,10 @@ def get_user_repo(session: AsyncSession = Depends(get_async_session)) -> UserRep
 def get_category_repo(session: AsyncSession = Depends(get_async_session)) -> CategoryRepository:
     return CategoryRepository(session)
 
+def get_comment_repo(session: AsyncSession = Depends(get_async_session)) -> CommentRepository:
+    return CommentRepository(session)
+
+
 def get_auth_service(user_repo: UserRepository = Depends(get_user_repo)) -> AuthService:
     return AuthService(user_repo)
 
@@ -36,6 +42,10 @@ def get_category_service(category_repo: CategoryRepository = Depends(get_categor
 
 def get_user_service(user_repo: UserRepository = Depends(get_user_repo)) -> UserService:
     return UserService(user_repo)
+
+def get_comment_service(comment_repo: CommentRepository = Depends(get_comment_repo)) -> CommentService:
+    return CommentService(comment_repo)
+
 
 
 async def get_current_user(

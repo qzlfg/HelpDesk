@@ -4,6 +4,7 @@ from fastapi import FastAPI
 # Здесь будут импорты твоих роутеров, когда мы их напишем
 # from app.api.routers import user_router, ticket_router
 from app.api.v1.auth import router as auth_router
+from app.api.v1.users import router as users_router
 
 
 def create_app() -> FastAPI:
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     # app.include_router(user_router.router, prefix="/api/v1/users", tags=["Пользователи"])
     # app.include_router(ticket_router.router, prefix="/api/v1/tickets", tags=["Тикеты"])
     app.include_router(auth_router, prefix="", tags=["Аутификация"])
+    app.include_router(users_router, prefix="/api/v1")
 
     # 3. Здесь же можно добавить обработчики ошибок (Exception Handlers)
     
