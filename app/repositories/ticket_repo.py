@@ -1,22 +1,96 @@
-from sqlmodel import select, col
+from sqlmodel import select, col, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Sequence
+from typing import Sequence, List
 from datetime import datetime, timezone
 
 
 from ..models.ticket import Ticket
 from ..schemas.ticket import TicketCreate
+from app.models.enums import Status
 
 
 class TicketRepository:
     """
     Слой доступа к данным для сущности Ticket.
-    Изолирует написание SQL-запросов от остальной бизнес-логики приложения.
     """
     def __init__(self, session: AsyncSession):
         self.session = session
+        
+        
+    async def get_client_tickets(self,
+                                creator_id: int | None,
+                                ticket_statuses: List[Status] | None,
+                                category_ids: List[int] | None,
+                                skip: int, limit: int,
+    ) -> Sequence[Ticket]:
+        query = select(Ticket).where(Ticket.creator_id == creator_id)
+        
+        if ticket_statuses:
+            query = query.where(col(Ticket.status).in_(ticket_statuses))
+        else:
+            query = query.where(Ticket.status != Status.CLOSED)
+            
+        if category_ids:
+            query = query.where(col(Ticket.category_id).in_(category_ids))
+            
+        query = query.order_by(col(Ticket.created_at)).offset(skip).limit(limit)
+        
+        result = await self.session.execute(query)
+        return result.scalars().all()
+    
+    
+    async def get_agent_tickets(self,
+                                agent_id: int | None,
+                                ticket_statuses: List[Status] | None,
+                                category_ids: List[int] | None,
+                                skip: int, limit: int,
+    ) -> Sequence[Ticket]:
+        query = select(Ticket).where(Ticket.assignee_id == agent_id)
+        
+        if ticket_statuses:
+            query = query.where(col(Ticket.status).in_(ticket_statuses))
+        else:
+            query = query.where(Ticket.status != Status.CLOSED)
+            
+        if category_ids:
+            query = query.where(col(Ticket.category_id).in_(category_ids))
+            
+        query = query.order_by(col(Ticket.created_at)).offset(skip).limit(limit)
+        
+        result = await self.session.execute(query)
+        return result.scalars().all()
+    
+    
+    async def get_admin_tickets(self,
+        creator_id: int | None,
+        agent_id: int | None,
+        ticket_statuses: List[Status] | None,
+        category_ids: List[int] | None,
+        skip: int, limit: int,
+    ) -> Sequence[Ticket]:
+        query = select(Ticket)
+        
+        if creator_id:
+            query = query.where(Ticket.creator_id == creator_id)
+            
+        if agent_id:
+            query = query.where(Ticket.assignee_id == agent_id)
+        
+        if ticket_statuses:
+            query = query.where(col(Ticket.status).in_(ticket_statuses))
+        else:
+            query = query.where(Ticket.status != Status.CLOSED)
+            
+        if category_ids:
+            query = query.where(col(Ticket.category_id).in_(category_ids))
+            
+        query = query.order_by(col(Ticket.created_at)).offset(skip).limit(limit)
+        
+        result = await self.session.execute(query)
+        return result.scalars().all()
 
-    async def get_by_id(self, ticket_id: int) -> Ticket | None:
+
+    async def get_ticket_by_id(self, ticket_id: int) -> Ticket | None:
         """
         Ищет тикет по ID.
         Возвращает объект Ticket или None, если такого тикета нет.

@@ -24,6 +24,16 @@ class TicketResponse(TicketBase):
     assignee_id: int | None = None
     
     model_config = ConfigDict(from_attributes=True)
+    
+
+class TicketAdminResponse(TicketResponse):
+    """
+    Расширенная схема для админов и агентов.
+    Включает метрики SLA и может включать историю/комментарии.
+    """
+    # Метрики SLA
+    response_deadline: datetime | None = None
+    resolution_deadline: datetime | None = None
 
 
 class TicketUpdate(BaseModel):
