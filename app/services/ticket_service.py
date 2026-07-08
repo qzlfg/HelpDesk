@@ -24,6 +24,8 @@ class TicketService:
                             category_id: List[int] | None,
                             skip: int, limit: int
     ) -> Sequence[Ticket]:
+        assert user.id is not None, "Пользователь должен иметь ID"
+        
         if user.role == Role.CLIENT:
             return await self.ticket_repo.get_client_tickets(
                 user.id,

@@ -18,7 +18,7 @@ class TicketRepository:
         
         
     async def get_client_tickets(self,
-                                creator_id: int | None,
+                                creator_id: int,
                                 ticket_statuses: List[Status] | None,
                                 category_ids: List[int] | None,
                                 skip: int, limit: int,
@@ -40,7 +40,7 @@ class TicketRepository:
     
     
     async def get_agent_tickets(self,
-                                agent_id: int | None,
+                                agent_id: int,
                                 ticket_statuses: List[Status] | None,
                                 category_ids: List[int] | None,
                                 skip: int, limit: int,

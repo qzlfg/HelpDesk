@@ -20,10 +20,12 @@ router = APIRouter()
 @router.post("/tickets", response_model=TicketResponse)
 async def create_ticket(
     ticket_in: TicketCreate,
-    creator_id: int,
+    cur_user: User = Depends(get_current_user),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
-    return ticket_service.create_ticket(ticket_in=ticket_in, creator_id=creator_id)
+    assert cur_user.id is not None, "У пользователя из БД всегда есть ID"
+    
+    return await ticket_service.create_ticket(ticket_in=ticket_in, creator_id=cur_user.id)
 
 
 @router.get("/tickets", response_model=list[TicketResponse | TicketAdminResponse])
@@ -37,7 +39,9 @@ async def get_all_tickets(
     cur_user: User = Depends(get_current_user),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
-    return ticket_service.get_all_tickets(
+    assert cur_user.id is not None, "У пользователя из БД всегда есть ID"
+    
+    return await ticket_service.get_all_tickets(
         cur_user,
         target_creator_id,
         target_agent_id,
@@ -54,4 +58,7 @@ async def get_one_ticket(
     cur_user: User = Depends(get_current_user),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
+    
+    assert cur_user.id is not None, "У пользователя из БД всегда есть ID"
+    
     return await ticket_service.get_ticket_by_id(id, cur_user)
