@@ -61,7 +61,7 @@ async def get_current_user(
 ):
     """
     Расшифровывает JWT-токен, достает ID пользователя и проверяет его в БД.
-    Возвращает объект пользователя или выбрасывает ошибку 401.
+    Возвращает объект пользователя   или выбрасывает ошибку 401.
     """
     
     credentials_exception = HTTPException(
@@ -108,6 +108,7 @@ async def get_current_admin(
 async def get_current_agent(
     current_user: User = Depends(get_current_user)
 ) -> User:
+    
     if current_user.role not in (Role.AGENT, Role.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

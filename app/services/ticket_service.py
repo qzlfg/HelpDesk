@@ -85,3 +85,27 @@ class TicketService:
             raise ValueError("Такого тикета не существует")
         update_data = update_in.model_dump(exclude_unset=True)
         return await self.ticket_repo.update(db_ticket, update_data)
+    
+    
+    async def assign_ticket(self, ticket_id: int, staff_user: User, assign_id: int | None = None):
+        ticket = await self.ticket_repo.get_ticket_by_id(ticket_id)
+        
+        if not ticket:
+            raise ValueError("Такого тикета не существует")
+        
+        final_assignee_id = None
+        
+        if staff_user.role == Role.AGENT:
+            final_assignee_id = staff_user.id
+        
+        else:
+            if assign_id is None:
+                raise ValueError("Администратор обязан указать ID агента для назначения")
+            final_assignee_id = assign_id
+        
+        update_data = {
+        "assignee_id": final_assignee_id,
+        "status": Status.IN_PROGRESS
+        }
+        
+        return await self.ticket_repo.update(ticket, update_data)
