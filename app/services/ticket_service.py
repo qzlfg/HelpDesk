@@ -1,15 +1,19 @@
-from typing import Sequence, List
+from typing import Sequence, List, Any, Dict
+from datetime import datetime, timezone
 
 from ..repositories.ticket_repo import TicketRepository
-from ..schemas.ticket import TicketCreate, TicketUpdate
+from ..schemas.ticket import TicketCreate, TicketUpdate, TicketStatusUpdate
 from ..models.ticket import Ticket
+from ..schemas.ticket_history import TicketHistoryCreate
+from ..repositories.ticket_history_repo import TicketHistoryRepository
 from app.models.user import User
 from app.models.enums import Status, Role
 
 
 class TicketService:
-    def __init__(self, ticket_repo: TicketRepository):
+    def __init__(self, ticket_repo: TicketRepository, ticket_hitory_repo: TicketHistoryRepository):
         self.ticket_repo = ticket_repo
+        self.ticket_history_repo = ticket_hitory_repo
     
     
     async def create_ticket(self, ticket_in: TicketCreate, creator_id: int) -> Ticket:
@@ -102,10 +106,69 @@ class TicketService:
             if assign_id is None:
                 raise ValueError("Администратор обязан указать ID агента для назначения")
             final_assignee_id = assign_id
+            
+        assert staff_user.id is not None, "У пользователя обязан быть ID"
         
         update_data = {
         "assignee_id": final_assignee_id,
         "status": Status.IN_PROGRESS
         }
         
-        return await self.ticket_repo.update(ticket, update_data)
+        history_record = TicketHistoryCreate(
+            ticket_id=ticket_id,
+            field_name="status",
+            old_value=str(ticket.assignee_id),
+            new_value=str(final_assignee_id)
+        )
+        
+        
+        
+        updated_ticket = await self.ticket_repo.update(ticket, update_data)
+        
+        await self.ticket_history_repo.create(history_record, staff_user.id)
+        
+        return updated_ticket
+    
+    async def update_ticket_status(self, ticket_id: int, user: User, new_status: TicketStatusUpdate):
+        ticket = await self.ticket_repo.get_ticket_by_id(ticket_id)
+        
+        if not ticket:
+            raise ValueError("Такого тикета не существует")
+        
+        cur_ticket_status = ticket.status #текущий статус тикета
+        
+        if cur_ticket_status == new_status.status:
+            return ticket
+        
+        if user.role == Role.AGENT:
+            if ticket.assignee_id != user.id:
+                raise ValueError("Этот тикет не вам назначен")
+            if cur_ticket_status == Status.CLOSED:
+                raise ValueError("Этот тикет уже закрыт")
+        
+        
+        assert user.id is not None, "У авторизованного пользователя обязан быть ID"
+        
+        
+        update_data: Dict[str, Any] = {
+            "status": new_status.status
+        }
+        
+        if new_status.status == Status.CLOSED:
+            update_data["closed_at"] = datetime.now(timezone.utc)
+        elif cur_ticket_status == Status.CLOSED and new_status.status != Status.CLOSED:
+            update_data["closed_at"] = None
+            
+        
+        updated_ticket = await self.ticket_repo.update(ticket, update_data)
+        
+        history_record = TicketHistoryCreate(
+            ticket_id=ticket_id,
+            field_name="status",
+            old_value=cur_ticket_status,
+            new_value=str(new_status.status)
+        )
+        
+        await self.ticket_history_repo.create(history_record, user.id)
+        
+        return updated_ticket

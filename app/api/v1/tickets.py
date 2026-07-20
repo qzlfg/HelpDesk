@@ -8,7 +8,7 @@ from app.models.ticket import Ticket
 from app.models.ticket_history import TicketHistory
 from app.models.enums import Status, Role
 
-from app.schemas.ticket import TicketCreate, TicketResponse, TicketAdminResponse
+from app.schemas.ticket import TicketCreate, TicketResponse, TicketAdminResponse, TicketStatusUpdate
 from app.schemas.ticket_history import TicketHistoryCreate
 
 from app.core.dependencies import get_current_user, get_ticket_service, get_current_agent, get_current_admin
@@ -80,4 +80,24 @@ async def assign_ticket(
     assign_id: int | None = Body(default=None, embed=False),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
-    return await ticket_service.assign_ticket(id, staff_user, assign_id)
+    raw_ticket = ticket_service.assign_ticket(id, staff_user, assign_id)
+    
+    if staff_user.role == Role.AGENT:
+        return TicketResponse.model_validate(raw_ticket)
+    
+    return TicketAdminResponse.model_validate(raw_ticket)
+
+
+@router.patch("/tickets/{id}/status")
+async def update_ticket_status(
+    id: int,
+    update_data: TicketStatusUpdate,
+    staff_user: User = Depends(get_current_agent),
+    ticket_service: TicketService = Depends(get_ticket_service)
+):
+    raw_ticket = ticket_service.update_ticket_status(id, staff_user, update_data)
+    
+    if staff_user.role == Role.AGENT:
+        return TicketResponse.model_validate(raw_ticket)
+    
+    return TicketAdminResponse.model_validate(raw_ticket)

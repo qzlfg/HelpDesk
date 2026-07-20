@@ -31,7 +31,6 @@ class TicketAdminResponse(TicketResponse):
     Расширенная схема для админов и агентов.
     Включает метрики SLA и может включать историю/комментарии.
     """
-    # Метрики SLA
     response_deadline: datetime | None = None
     resolution_deadline: datetime | None = None
 
@@ -40,4 +39,6 @@ class TicketUpdate(BaseModel):
     status: Status | None = None
     description: str | None = None
     priority: Priority | None = None
-    assignee_id: int | None = None
+    
+class TicketStatusUpdate(BaseModel):
+    status: Status | None = None
