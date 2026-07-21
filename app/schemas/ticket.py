@@ -24,7 +24,7 @@ class TicketResponse(TicketBase):
     assignee_id: int | None = None
     
     model_config = ConfigDict(from_attributes=True)
-    
+
 
 class TicketAdminResponse(TicketResponse):
     """
@@ -35,10 +35,13 @@ class TicketAdminResponse(TicketResponse):
     resolution_deadline: datetime | None = None
 
 
-class TicketUpdate(BaseModel):
-    status: Status | None = None
-    description: str | None = None
-    priority: Priority | None = None
-    
+class TicketDescriptionUpdate(BaseModel):
+    description: str
+
+
+class TicketPriorityUpdate(BaseModel):
+    priority: Priority
+
+
 class TicketStatusUpdate(BaseModel):
-    status: Status | None = None
+    status: Status
