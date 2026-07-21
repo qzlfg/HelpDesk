@@ -24,7 +24,10 @@ class TicketHistoryRepository:
         return ticket_db
         
     
-    async def get_by_ticket_id(self, ticket_id: int) -> Sequence[TicketHistory]:
-        statement = select(TicketHistory).where(TicketHistory.ticket_id == ticket_id).order_by(col(TicketHistory.changed_at))
+    async def get_ticket_history_by_id(self, ticket_id: int) -> Sequence[TicketHistory]:
+        statement = select(TicketHistory).where(TicketHistory.ticket_id == ticket_id
+                ).order_by(col(TicketHistory.changed_at).desc())
+        
         result = await self.session.execute(statement)
+        
         return result.scalars().all()

@@ -8,7 +8,7 @@ from app.models.ticket_history import TicketHistory
 from app.models.enums import Status, Role
 
 from app.schemas.ticket import TicketCreate, TicketResponse, TicketAdminResponse, TicketStatusUpdate, TicketDescriptionUpdate, TicketPriorityUpdate
-from app.schemas.ticket_history import TicketHistoryCreate
+from app.schemas.ticket_history import TicketHistoryResponse
 
 from app.core.dependencies import get_current_user, get_ticket_service, get_current_agent, get_current_admin
 
@@ -131,3 +131,12 @@ async def update_ticket_priority(
         return TicketResponse.model_validate(raw_ticket)
     
     return TicketAdminResponse.model_validate(raw_ticket)
+
+
+@router.get("/tickets/{id}/history", response_model=list[TicketHistoryResponse])
+async def get_ticket_history(
+    id: int,
+    staff_user: User = Depends(get_current_agent),
+    ticket_service: TicketService = Depends(get_ticket_service)
+):
+    return await ticket_service.get_ticket_history(id, staff_user)

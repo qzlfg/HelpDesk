@@ -244,3 +244,19 @@ class TicketService:
         await self.ticket_history_repo.create(history_record, user.id)
         
         return updated_ticket
+    
+    async def get_ticket_history(
+        self,
+        ticket_id: int,
+        user: User
+    ):
+        ticket = await self.ticket_repo.get_ticket_by_id(ticket_id)
+        
+        if not ticket:
+            raise ValueError("Такого тикета не существует")
+
+        if user.role == Role.AGENT:
+            if ticket.assignee_id != user.id:
+                raise ValueError("У вас нет прав на просмотр истории этого тикета")
+
+        return await self.ticket_history_repo.get_ticket_history_by_id(ticket_id)
