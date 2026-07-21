@@ -2,18 +2,18 @@ from typing import Sequence, List, Any, Dict
 from datetime import datetime, timezone
 
 from ..repositories.ticket_repo import TicketRepository
-from ..schemas.ticket import TicketCreate, TicketStatusUpdate, TicketDescriptionUpdate, TicketPriorityUpdate
+from ..schemas.ticket import TicketCreate
 from ..models.ticket import Ticket
 from ..schemas.ticket_history import TicketHistoryCreate
 from ..repositories.ticket_history_repo import TicketHistoryRepository
 from app.models.user import User
-from app.models.enums import Status, Role
+from app.models.enums import Status, Role, Priority
 
 
 class TicketService:
-    def __init__(self, ticket_repo: TicketRepository, ticket_hitory_repo: TicketHistoryRepository):
+    def __init__(self, ticket_repo: TicketRepository, ticket_history_repo: TicketHistoryRepository):
         self.ticket_repo = ticket_repo
-        self.ticket_history_repo = ticket_hitory_repo
+        self.ticket_history_repo = ticket_history_repo
     
     
     async def create_ticket(self, ticket_in: TicketCreate, creator_id: int) -> Ticket:
@@ -193,8 +193,6 @@ class TicketService:
         
         assert user.id is not None, "У авторизованного пользователя обязан быть ID"
         
-        assert new_description is not None, "Новое описание не должно являться None ли быть пустым"
-        
         
         history_record = TicketHistoryCreate(
             ticket_id=ticket_id,
@@ -205,6 +203,40 @@ class TicketService:
         
         update_data = {
             "description": new_description
+        }
+        
+        updated_ticket = await self.ticket_repo.update(ticket, update_data)
+        
+        await self.ticket_history_repo.create(history_record, user.id)
+        
+        return updated_ticket
+
+    
+    async def update_ticket_priority(
+        self,
+        ticket_id: int,
+        user: User,
+        new_priority: Priority
+    ) -> Ticket:
+        ticket = await self.ticket_repo.get_ticket_by_id(ticket_id)
+        
+        if not ticket:
+            raise ValueError("Такого тикета не существует")
+        
+        if ticket.status == Status.CLOSED:
+            raise ValueError("Этот тикет уже закрыт")
+        
+        assert user.id is not None, "У авторизованного пользователя обязан быть ID"
+        
+        history_record = TicketHistoryCreate(
+            ticket_id=ticket_id,
+            field_name="priority",
+            old_value=ticket.priority,
+            new_value=new_priority
+        )
+        
+        update_data = {
+            "priority": new_priority
         }
         
         updated_ticket = await self.ticket_repo.update(ticket, update_data)

@@ -12,6 +12,7 @@ from app.repositories.user_repo import UserRepository
 from app.repositories.category_repo import CategoryRepository
 from app.repositories.comment_repo import CommentRepository
 from app.repositories.ticket_repo import TicketRepository
+from app.repositories.ticket_history_repo import TicketHistoryRepository
 
 from app.services.auth_service import AuthService
 from app.services.user_service import UserService
@@ -38,6 +39,9 @@ def get_comment_repo(session: AsyncSession = Depends(get_async_session)) -> Comm
 def get_ticket_repo(session: AsyncSession = Depends(get_async_session)) -> TicketRepository:
     return TicketRepository(session)
 
+def get_ticket_history_repo(session: AsyncSession = Depends(get_async_session)) -> TicketHistoryRepository:
+    return TicketHistoryRepository(session)
+
 
 def get_auth_service(user_repo: UserRepository = Depends(get_user_repo)) -> AuthService:
     return AuthService(user_repo)
@@ -51,8 +55,9 @@ def get_user_service(user_repo: UserRepository = Depends(get_user_repo)) -> User
 def get_comment_service(comment_repo: CommentRepository = Depends(get_comment_repo)) -> CommentService:
     return CommentService(comment_repo)
 
-def get_ticket_service(ticket_repo: TicketRepository = Depends(get_ticket_repo)) -> TicketService:
-    return TicketService(ticket_repo) 
+def get_ticket_service(ticket_repo: TicketRepository = Depends(get_ticket_repo),
+                    ticket_history_repo: TicketHistoryRepository = Depends(get_ticket_history_repo)) -> TicketService:
+    return TicketService(ticket_repo, ticket_history_repo) 
 
 
 async def get_current_user(

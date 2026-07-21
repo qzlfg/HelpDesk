@@ -111,3 +111,23 @@ async def update_ticket_desription(
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
     raw_ticket = ticket_service.update_ticket_description(id, user, update_data.description)
+    
+    if user.role == Role.CLIENT:
+        return TicketResponse.model_validate(raw_ticket)
+    
+    return TicketAdminResponse.model_validate(raw_ticket)
+
+
+@router.patch("/tickets/{id}/priority")
+async def update_ticket_priority(
+    id: int,
+    update_data: TicketPriorityUpdate,
+    staff_user: User = Depends(get_current_agent),
+    ticket_service: TicketService = Depends(get_ticket_service)
+):
+    raw_ticket = ticket_service.update_ticket_description(id, staff_user, update_data.priority)
+    
+    if staff_user.role == Role.AGENT:
+        return TicketResponse.model_validate(raw_ticket)
+    
+    return TicketAdminResponse.model_validate(raw_ticket)
