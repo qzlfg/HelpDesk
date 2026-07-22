@@ -13,12 +13,14 @@ from app.repositories.category_repo import CategoryRepository
 from app.repositories.comment_repo import CommentRepository
 from app.repositories.ticket_repo import TicketRepository
 from app.repositories.ticket_history_repo import TicketHistoryRepository
+from app.repositories.category_repo import CategoryRepository
 
 from app.services.auth_service import AuthService
 from app.services.user_service import UserService
 from app.services.category_service import CategoryService
 from app.services.comment_service import CommentService
 from app.services.ticket_service import TicketService
+from app.services.category_service import CategoryService
 
 from app.models.enums import Role
 from app.models.user import User
