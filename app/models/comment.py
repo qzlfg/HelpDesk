@@ -20,7 +20,7 @@ class Comment(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
     content: str = Field(nullable=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime | None = Field(default=None)
+    last_modified: datetime | None = Field(default=None)
     
     #Внешние ключи
     creator_id: int = Field(foreign_key="user.id", index=True)

@@ -13,7 +13,7 @@ class CommentResponse(BaseModel):
     created_at: datetime
     creator_id: int
     ticket_id: int
-    updated_at: datetime | None
+    last_modified: datetime | None
     
     is_internal: bool
     

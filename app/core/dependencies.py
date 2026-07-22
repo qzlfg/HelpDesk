@@ -52,8 +52,9 @@ def get_category_service(category_repo: CategoryRepository = Depends(get_categor
 def get_user_service(user_repo: UserRepository = Depends(get_user_repo)) -> UserService:
     return UserService(user_repo)
 
-def get_comment_service(comment_repo: CommentRepository = Depends(get_comment_repo)) -> CommentService:
-    return CommentService(comment_repo)
+def get_comment_service(comment_repo: CommentRepository = Depends(get_comment_repo),
+                        ticket_repo: TicketRepository = Depends(get_ticket_repo)) -> CommentService:
+    return CommentService(comment_repo, ticket_repo)
 
 def get_ticket_service(ticket_repo: TicketRepository = Depends(get_ticket_repo),
                     ticket_history_repo: TicketHistoryRepository = Depends(get_ticket_history_repo)) -> TicketService:

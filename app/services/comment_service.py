@@ -91,7 +91,7 @@ class CommentService:
         
         updated_data = {
             "content": comment_in.content,
-            "updated_at": datetime.now(timezone.utc)
+            "last_modified": datetime.now(timezone.utc)
         }
         
         return await self.comment_repo.update(comment, updated_data)
