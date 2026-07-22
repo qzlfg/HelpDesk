@@ -4,7 +4,6 @@ from datetime import datetime
 
 class CommentCreate(BaseModel):
     content: str
-    ticket_id: int
     is_internal: bool = False
 
 
@@ -14,6 +13,7 @@ class CommentResponse(BaseModel):
     created_at: datetime
     creator_id: int
     ticket_id: int
+    updated_at: datetime | None
     
     is_internal: bool
     

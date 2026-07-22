@@ -76,10 +76,10 @@ async def get_one_ticket(
 async def assign_ticket(
     id: int, #id тикета
     staff_user: User = Depends(get_current_agent),
-    assign_id: int | None = Body(default=None, embed=False),
+    assign_id: int | None = Body(default=None, embed=True),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
-    raw_ticket = ticket_service.assign_ticket(id, staff_user, assign_id)
+    raw_ticket = await ticket_service.assign_ticket(id, staff_user, assign_id)
     
     if staff_user.role == Role.AGENT:
         return TicketResponse.model_validate(raw_ticket)
@@ -95,7 +95,7 @@ async def update_ticket_status(
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
     
-    raw_ticket = ticket_service.update_ticket_status(id, staff_user, update_data.status)
+    raw_ticket = await ticket_service.update_ticket_status(id, staff_user, update_data.status)
     
     if staff_user.role == Role.AGENT:
         return TicketResponse.model_validate(raw_ticket)
@@ -104,13 +104,13 @@ async def update_ticket_status(
 
 
 @router.patch("/tickets/{id}/description")
-async def update_ticket_desription(
+async def update_ticket_description(
     id: int,
     update_data: TicketDescriptionUpdate,
     user: User = Depends(get_current_user),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
-    raw_ticket = ticket_service.update_ticket_description(id, user, update_data.description)
+    raw_ticket = await ticket_service.update_ticket_description(id, user, update_data.description)
     
     if user.role == Role.CLIENT:
         return TicketResponse.model_validate(raw_ticket)
@@ -125,7 +125,7 @@ async def update_ticket_priority(
     staff_user: User = Depends(get_current_agent),
     ticket_service: TicketService = Depends(get_ticket_service)
 ):
-    raw_ticket = ticket_service.update_ticket_description(id, staff_user, update_data.priority)
+    raw_ticket = await ticket_service.update_ticket_description(id, staff_user, update_data.priority)
     
     if staff_user.role == Role.AGENT:
         return TicketResponse.model_validate(raw_ticket)

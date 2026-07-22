@@ -17,20 +17,21 @@ class CommentRepository:
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
     
-    async def get_by_ticket_id(self, ticket_id: int) -> Sequence[Comment]:
+    async def get_by_ticket_id(self, ticket_id: int, only_public: bool = False) -> Sequence[Comment]:
         """
         Получает все комментарии для конкретного тикета.
         Метод для отрисовки "чата" внутри заявки.
         """
-        statement = (
-            select(Comment)
-            .where(Comment.ticket_id == ticket_id)
-            .order_by(col(Comment.created_at))
-        )
+        statement = select(Comment).where(Comment.ticket_id == ticket_id)
+        
+        if only_public:
+            statement = statement.where(not Comment.is_internal) #если клиент или попросили только публичные
+            
+        statement = statement.order_by(col(Comment.created_at))
         result = await self.session.execute(statement)
         return result.scalars().all()
 
-    async def create(self, comment_in: CommentCreate, creator_id: int) -> Comment:
+    async def create(self, ticket_id: int, comment_in: CommentCreate, creator_id: int) -> Comment:
         """
         Создает новый комментарий.
         ID автора (creator_id) внедряется на сервере для безопасности, 
@@ -38,6 +39,7 @@ class CommentRepository:
         """
         comment_data = comment_in.model_dump()
         comment_data["creator_id"] = creator_id
+        comment_data["ticket_id"] = ticket_id
         
         db_comment = Comment(**comment_data)
         
