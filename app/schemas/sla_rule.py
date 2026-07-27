@@ -16,7 +16,7 @@ class BaseSLARule(BaseModel):
 class CreateSLARule(BaseSLARule):
     pass
 
-class ResponseSLARule(BaseSLARule):
+class SLARuleResponse(BaseSLARule):
     id: int
     is_active: bool
     

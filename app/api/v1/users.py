@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Annotated
 
 
 from app.core.dependencies import get_user_service, get_current_admin, get_current_user
@@ -10,18 +11,20 @@ from app.services.user_service import UserService
 from app.models.user import User
 
 
+CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentAdmin = Annotated[User, Depends(get_current_admin)]
+UserSvc = Annotated[UserService, Depends(get_user_service)]
+
+
 router = APIRouter()
 
 @router.post("/register", response_model=UserResponse)
 async def registry(
     user_in: UserCreate,
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserSvc
 ):
     try:
-        new_user = await user_service.create_user(user_in)
-        
-        return new_user
-    
+        return await user_service.create_user(user_in)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -29,27 +32,28 @@ async def registry(
         )
 
 
-@router.get("/users")
+@router.get("/users", response_model=list[UserResponse])
 async def get_all_users(
-    skip: int = 0,
-    limit: int = 100,
-    admin: User = Depends(get_current_admin),
-    user_service: UserService = Depends(get_user_service)
+    admin: CurrentAdmin,
+    user_service: UserSvc,
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 100
 ):
     return await user_service.get_all_users(skip, limit)
 
 
-@router.get("/users/me")
+@router.get("/users/me", response_model=UserResponse)
 async def get_user_profile(
-    cur_user: User = Depends(get_current_user),
+    cur_user: CurrentUser,
 ):
     return cur_user
 
-@router.patch("/users/{id}")
+
+@router.patch("/users/{id}", response_model=UserResponse)
 async def change_user_data(
     id: int,
     update_in: UserUpdateAdmin,
-    user_service: UserService = Depends(get_user_service),
-    admin: User = Depends(get_current_admin),
+    admin: CurrentAdmin,
+    user_service: UserSvc
 ):
     return await user_service.update_user_by_admin(id, update_in)

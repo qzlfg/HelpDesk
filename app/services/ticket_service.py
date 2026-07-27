@@ -1,5 +1,5 @@
 from typing import Sequence, List, Any, Dict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from ..repositories.ticket_repo import TicketRepository
 from ..schemas.ticket import TicketCreate
@@ -8,16 +8,35 @@ from ..schemas.ticket_history import TicketHistoryCreate
 from ..repositories.ticket_history_repo import TicketHistoryRepository
 from app.models.user import User
 from app.models.enums import Status, Role, Priority
-
+from app.repositories.sla_repo import SLARuleRepository
 
 class TicketService:
-    def __init__(self, ticket_repo: TicketRepository, ticket_history_repo: TicketHistoryRepository):
+    def __init__(self, ticket_repo: TicketRepository, ticket_history_repo: TicketHistoryRepository,
+                sla_repo: SLARuleRepository):
         self.ticket_repo = ticket_repo
         self.ticket_history_repo = ticket_history_repo
+        self.sla_repo = sla_repo
     
     
     async def create_ticket(self, ticket_in: TicketCreate, creator_id: int) -> Ticket:
-        return await self.ticket_repo.create(ticket_in=ticket_in, creator_id=creator_id)
+        sla_rule = await self.sla_repo.find_matching_rule(ticket_in.priority, ticket_in.category_id)
+        
+        response_deadline = None
+        resolution_deadline = None
+        
+        if sla_rule is not None:
+            now = datetime.now(timezone.utc)
+            response_deadline = now + timedelta(minutes=sla_rule.response_time_minutes)
+            resolution_deadline = now + timedelta(minutes=sla_rule.resolution_time_minutes)
+        else:
+            raise ValueError("SLA правило не найдено для данной комбинации приоритета и категории")
+        
+        assert response_deadline is not None, "Не может быть None"
+        assert resolution_deadline is not None, "Не может быть None"
+        
+            
+        return await self.ticket_repo.create(ticket_in=ticket_in, creator_id=creator_id, response_deadline=response_deadline,
+                                            resolution_deadline=resolution_deadline)
     
     
     async def get_all_tickets(self,

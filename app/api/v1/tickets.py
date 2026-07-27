@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, Body
-from typing import List
+from typing import Annotated, List
 
 from app.services.ticket_service import TicketService
 
@@ -15,12 +15,16 @@ from app.core.dependencies import get_current_user, get_ticket_service, get_curr
 
 router = APIRouter()
 
+CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentAgent = Annotated[User, Depends(get_current_agent)]
+TicketServiceDep = Annotated[TicketService, Depends(get_ticket_service)]
+
 
 @router.post("/tickets", response_model=TicketResponse)
 async def create_ticket(
     ticket_in: TicketCreate,
-    cur_user: User = Depends(get_current_user),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    cur_user: CurrentUser,
+    ticket_service: TicketServiceDep
 ):
     assert cur_user.id is not None, "У пользователя из БД всегда есть ID"
     
@@ -29,14 +33,14 @@ async def create_ticket(
 
 @router.get("/tickets")
 async def get_all_tickets(
-    skip: int = 0,
-    limit: int = 15,
-    target_creator_id: int | None = Query(default=None, description="Фильтр по автору (только для админов)"),
-    target_agent_id: int | None = Query(default=None, description="Фильтр по агенту (только для админов)"),
-    statuses: List[Status] | None = Query(None),
-    category_ids: List[int] | None = Query(None),
-    cur_user: User = Depends(get_current_user),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    cur_user: CurrentUser,
+    ticket_service: TicketServiceDep,
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 15,
+    target_creator_id: Annotated[int | None, Query(description="Фильтр по автору (только для админов)")] = None,
+    target_agent_id: Annotated[int | None, Query(description="Фильтр по агенту (только для админов)")] = None,
+    statuses: Annotated[List[Status] | None, Query()] = None,
+    category_ids: Annotated[List[int] | None, Query()] = None,
 ):
     assert cur_user.id is not None, "У пользователя из БД всегда есть ID"
     
@@ -58,11 +62,10 @@ async def get_all_tickets(
 
 @router.get("/tickets/{id}")
 async def get_one_ticket(
-    id: int, #id тикета
-    cur_user: User = Depends(get_current_user),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    id: int,
+    cur_user: CurrentUser,
+    ticket_service: TicketServiceDep
 ):
-    
     assert cur_user.id is not None, "У пользователя из БД всегда есть ID"
     
     raw_ticket = await ticket_service.get_ticket_by_id(id, cur_user)
@@ -74,10 +77,10 @@ async def get_one_ticket(
 
 @router.patch("/tickets/{id}/assign")
 async def assign_ticket(
-    id: int, #id тикета
-    staff_user: User = Depends(get_current_agent),
-    assign_id: int | None = Body(default=None, embed=True),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    ticket_service: TicketServiceDep,
+    id: int,
+    staff_user: CurrentAgent,
+    assign_id: Annotated[int | None, Body(embed=True)] = None,
 ):
     raw_ticket = await ticket_service.assign_ticket(id, staff_user, assign_id)
     
@@ -91,10 +94,9 @@ async def assign_ticket(
 async def update_ticket_status(
     id: int,
     update_data: TicketStatusUpdate,
-    staff_user: User = Depends(get_current_agent),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    staff_user: CurrentAgent,
+    ticket_service: TicketServiceDep
 ):
-    
     raw_ticket = await ticket_service.update_ticket_status(id, staff_user, update_data.status)
     
     if staff_user.role == Role.AGENT:
@@ -107,8 +109,8 @@ async def update_ticket_status(
 async def update_ticket_description(
     id: int,
     update_data: TicketDescriptionUpdate,
-    user: User = Depends(get_current_user),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    user: CurrentUser,
+    ticket_service: TicketServiceDep
 ):
     raw_ticket = await ticket_service.update_ticket_description(id, user, update_data.description)
     
@@ -122,10 +124,10 @@ async def update_ticket_description(
 async def update_ticket_priority(
     id: int,
     update_data: TicketPriorityUpdate,
-    staff_user: User = Depends(get_current_agent),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    staff_user: CurrentAgent,
+    ticket_service: TicketServiceDep
 ):
-    raw_ticket = await ticket_service.update_ticket_description(id, staff_user, update_data.priority)
+    raw_ticket = await ticket_service.update_ticket_priority(id, staff_user, update_data.priority)
     
     if staff_user.role == Role.AGENT:
         return TicketResponse.model_validate(raw_ticket)
@@ -136,7 +138,7 @@ async def update_ticket_priority(
 @router.get("/tickets/{id}/history", response_model=list[TicketHistoryResponse])
 async def get_ticket_history(
     id: int,
-    staff_user: User = Depends(get_current_agent),
-    ticket_service: TicketService = Depends(get_ticket_service)
+    staff_user: CurrentAgent,
+    ticket_service: TicketServiceDep
 ):
     return await ticket_service.get_ticket_history(id, staff_user)

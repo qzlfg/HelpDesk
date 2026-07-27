@@ -107,12 +107,20 @@ class TicketRepository:
         result = await self.session.execute(statement)
         return result.scalars().all()
 
-    async def create(self, ticket_in: TicketCreate, creator_id: int) -> Ticket:
+    async def create(
+        self, 
+        ticket_in: TicketCreate, 
+        creator_id: int, 
+        response_deadline: datetime,
+        resolution_deadline: datetime
+    ) -> Ticket:
         """
-        Создает нового пользователя в базе данных.
+        Создает новый тикет в базе данных.
         """
         ticket_data = ticket_in.model_dump()
         ticket_data["creator_id"] = creator_id
+        ticket_data["resolution_deadline"] = resolution_deadline
+        ticket_data["response_deadline"] = response_deadline
         
         db_ticket = Ticket(**ticket_data)
         
@@ -121,7 +129,7 @@ class TicketRepository:
         await self.session.refresh(db_ticket)
         
         return db_ticket
-    
+        
 
     async def update(self, db_ticket: Ticket, update_data: dict) -> Ticket:
         """

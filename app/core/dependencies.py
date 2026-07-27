@@ -13,14 +13,14 @@ from app.repositories.category_repo import CategoryRepository
 from app.repositories.comment_repo import CommentRepository
 from app.repositories.ticket_repo import TicketRepository
 from app.repositories.ticket_history_repo import TicketHistoryRepository
-from app.repositories.category_repo import CategoryRepository
+from app.repositories.sla_repo import SLARuleRepository
 
 from app.services.auth_service import AuthService
 from app.services.user_service import UserService
 from app.services.category_service import CategoryService
 from app.services.comment_service import CommentService
 from app.services.ticket_service import TicketService
-from app.services.category_service import CategoryService
+from app.services.sla_service import SLARuleService
 
 from app.models.enums import Role
 from app.models.user import User
@@ -44,6 +44,9 @@ def get_ticket_repo(session: AsyncSession = Depends(get_async_session)) -> Ticke
 def get_ticket_history_repo(session: AsyncSession = Depends(get_async_session)) -> TicketHistoryRepository:
     return TicketHistoryRepository(session)
 
+def get_sla_repo(session: AsyncSession = Depends(get_async_session)) -> SLARuleRepository:
+    return SLARuleRepository(session)
+
 
 def get_auth_service(user_repo: UserRepository = Depends(get_user_repo)) -> AuthService:
     return AuthService(user_repo)
@@ -59,8 +62,12 @@ def get_comment_service(comment_repo: CommentRepository = Depends(get_comment_re
     return CommentService(comment_repo, ticket_repo)
 
 def get_ticket_service(ticket_repo: TicketRepository = Depends(get_ticket_repo),
-                    ticket_history_repo: TicketHistoryRepository = Depends(get_ticket_history_repo)) -> TicketService:
-    return TicketService(ticket_repo, ticket_history_repo) 
+                    ticket_history_repo: TicketHistoryRepository = Depends(get_ticket_history_repo),
+                    sla_repo: SLARuleRepository = Depends(get_sla_repo)) -> TicketService:
+    return TicketService(ticket_repo, ticket_history_repo, sla_repo) 
+
+def get_sla_service(sla_repo: SLARuleRepository = Depends(get_sla_repo)) -> SLARuleService:
+    return SLARuleService(sla_repo)
 
 
 async def get_current_user(
