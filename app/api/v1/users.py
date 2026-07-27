@@ -1,15 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.dependencies import get_user_service, get_current_admin, get_current_user
-
-from app.schemas.user import UserCreate, UserResponse, UserUpdateAdmin
-
-from app.services.user_service import UserService
-
+from app.core.dependencies import get_current_admin, get_current_user, get_user_service
 from app.models.user import User
-
+from app.schemas.user import UserCreate, UserResponse, UserUpdateAdmin
+from app.services.user_service import UserService
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 CurrentAdmin = Annotated[User, Depends(get_current_admin)]

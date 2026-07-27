@@ -1,10 +1,11 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, Enum, UniqueConstraint
-from .enums import Priority
+from sqlmodel import Field, Relationship, SQLModel
 
+from .enums import Priority
 
 if TYPE_CHECKING:
     from .category import Category

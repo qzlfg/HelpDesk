@@ -1,14 +1,11 @@
-from fastapi import APIRouter, Depends
 from typing import Annotated
 
+from fastapi import APIRouter, Depends
+
 from app.core.dependencies import get_comment_service, get_current_user
-
 from app.models.user import User
-
+from app.schemas.comment import CommentCreate, CommentResponse, CommentUpdate
 from app.services.comment_service import CommentService
-
-from app.schemas.comment import CommentResponse, CommentCreate, CommentUpdate
-
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 CommentSvc = Annotated[CommentService, Depends(get_comment_service)]

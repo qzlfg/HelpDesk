@@ -1,12 +1,13 @@
-from sqlmodel import select, col, and_
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Sequence, List
+from collections.abc import Sequence
 from datetime import datetime, timezone
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import col, select
+
+from app.models.enums import Status
 
 from ..models.ticket import Ticket
 from ..schemas.ticket import TicketCreate
-from app.models.enums import Status
 
 
 class TicketRepository:
@@ -19,8 +20,8 @@ class TicketRepository:
         
     async def get_client_tickets(self,
                                 creator_id: int,
-                                ticket_statuses: List[Status] | None,
-                                category_ids: List[int] | None,
+                                ticket_statuses: list[Status] | None,
+                                category_ids: list[int] | None,
                                 skip: int, limit: int,
     ) -> Sequence[Ticket]:
         query = select(Ticket).where(Ticket.creator_id == creator_id)
@@ -41,8 +42,8 @@ class TicketRepository:
     
     async def get_agent_tickets(self,
                                 agent_id: int,
-                                ticket_statuses: List[Status] | None,
-                                category_ids: List[int] | None,
+                                ticket_statuses: list[Status] | None,
+                                category_ids: list[int] | None,
                                 skip: int, limit: int,
     ) -> Sequence[Ticket]:
         query = select(Ticket).where(Ticket.assignee_id == agent_id)
@@ -64,8 +65,8 @@ class TicketRepository:
     async def get_admin_tickets(self,
         creator_id: int | None,
         agent_id: int | None,
-        ticket_statuses: List[Status] | None,
-        category_ids: List[int] | None,
+        ticket_statuses: list[Status] | None,
+        category_ids: list[int] | None,
         skip: int, limit: int,
     ) -> Sequence[Ticket]:
         query = select(Ticket)

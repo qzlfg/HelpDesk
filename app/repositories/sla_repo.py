@@ -1,9 +1,10 @@
-from sqlmodel import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Sequence
+from collections.abc import Sequence
 
-from ..models.sla_rule import SLARule
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
+
 from ..models.enums import Priority
+from ..models.sla_rule import SLARule
 from ..schemas.sla_rule import CreateSLARule
 
 
@@ -73,3 +74,11 @@ class SLARuleRepository:
         await self.session.refresh(db_rule)
         
         return db_rule
+    
+    async def deactivate(self, rule: SLARule) -> SLARule:
+        """Мягкое удаление SLA правила"""
+        rule.is_active = False
+        self.session.add(rule)
+        await self.session.flush()
+        await self.session.refresh(rule)
+        return rule

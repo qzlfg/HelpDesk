@@ -1,7 +1,7 @@
-from sqlmodel import select, col
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Sequence
+from collections.abc import Sequence
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import col, select
 
 from ..models.ticket_history import TicketHistory
 from ..schemas.ticket_history import TicketHistoryCreate

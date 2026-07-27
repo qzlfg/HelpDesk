@@ -1,8 +1,8 @@
-from typing import Sequence
+from collections.abc import Sequence
 
+from ..models.sla_rule import SLARule
 from ..repositories.sla_repo import SLARuleRepository
 from ..schemas.sla_rule import CreateSLARule, SLARuleUpdate
-from ..models.sla_rule import SLARule
 
 
 class SLARuleService:
@@ -32,3 +32,14 @@ class SLARuleService:
         sla_rule = await self.get_by_id(sla_id)
         update_data = sla_update.model_dump(exclude_unset=True)
         return await self.sla_repo.update(sla_rule, update_data)
+    
+    async def delete_sla_rule(self, rule_id: int) -> SLARule:
+        rule = await self.sla_repo.get_by_id(rule_id)
+        
+        if not rule:
+            raise ValueError("Правило SLA не найдено")
+            
+        if not rule.is_active:
+            raise ValueError("Это правило уже деактивировано")
+            
+        return await self.sla_repo.deactivate(rule)

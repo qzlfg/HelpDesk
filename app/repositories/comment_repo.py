@@ -1,9 +1,11 @@
-from sqlmodel import select, col
+from collections.abc import Sequence
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Sequence
+from sqlmodel import col, select
 
 from ..models.comment import Comment
 from ..schemas.comment import CommentCreate
+
 
 class CommentRepository:
     def __init__(self, session: AsyncSession):
